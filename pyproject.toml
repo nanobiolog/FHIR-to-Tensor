@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
   { name = "ATIL İHSAN YALI", email = "nano.carbay@gmail.com" },
 ]
-license = { text = "AGPL-3.0" }
+license = "AGPL-3.0-or-later"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Healthcare Industry",
