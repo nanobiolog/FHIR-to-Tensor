@@ -63,6 +63,7 @@ graph LR
 $$
 h_v^{(t)} = \text{GRU}(h_v^{(t-1)}, \text{AGG}(\{h_u^{(t)} : u \in \mathcal{N}(v)\}))
 $$
+
 This allows the model to learn **temporal dynamics** of interactions (e.g., *Drug A* interacts with *Drug B* only if taken within 2 hours).
 
 ### 2. Hyperbolic Geometry (The Poincaré Ball)
@@ -87,9 +88,11 @@ graph TD
 
 We model embeddings in the **Poincaré Ball** $(\mathbb{D}^n, g_x)$ with curvature $c=1$.
 The distance metric is defined as:
+
 $$
 d_{\mathbb{D}}(x, y) = \text{arcosh} \left( 1 + 2 \frac{\|x-y\|^2}{(1-\|x\|^2)(1-\|y\|^2)} \right)
 $$
+
 This metric grows **exponentially** as you approach the boundary ($||x|| \rightarrow 1$), providing infinite space for the exponentially growing number of leaf nodes in medical taxonomies.
 
 **Möbius Addition** for updates:
