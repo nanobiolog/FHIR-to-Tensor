@@ -1,4 +1,5 @@
 # NeuroFHIR: Geometric Deep Learning for Clinical Informatics
+[![PyPI version](https://badge.fury.io/py/neurofhir.svg)](https://badge.fury.io/py/neurofhir)
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
