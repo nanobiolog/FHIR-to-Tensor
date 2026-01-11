@@ -8,9 +8,14 @@ jobs:
   build-n-publish:
     name: Build and publish to PyPI
     runs-on: ubuntu-latest
-    environment: pypi
+    
+    # Environment config for OIDC
+    environment:
+      name: 'pypi'
+      url: 'https://pypi.org/p/neurofhir'
+
     permissions:
-      id-token: write  # Mandatory for OIDC/Trusted Publishing
+      id-token: write
       contents: read
 
     steps:
@@ -29,6 +34,4 @@ jobs:
       run: python -m build
 
     - name: Publish package to PyPI
-    # Standard action for trusted publishing
       uses: pypa/gh-action-pypi-publish@release/v1
-      # Note: No API token or password needed with OIDC
