@@ -3,7 +3,7 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![PyPi](https://img.shields.io/badge/pypi-v0.1.0-blue.svg)](https://pypi.org/project/neurofhir/)
+[![PyPi](https://img.shields.io/badge/pypi-v0.1.4-blue.svg)](https://pypi.org/project/neurofhir/)
 
 **NeuroFHIR** is a state-of-the-art library for transforming longitudinal FHIR (Fast Healthcare Interoperability Resources) data into **Temporal, Hierarchical, and Explainable Graph Tensors**. It enables the application of **Geometric Deep Learning (GDL)** to clinical informatics, moving beyond simple feature vectors to capture the true topological and temporal nature of patient health.
 
@@ -52,6 +52,12 @@ graph LR
     T2[Snapshot 2] --> GNN
     GNN --> H[Hidden State]
     end
+
+    style P1 fill:#1a1a1a,stroke:#333,color:#fff
+    style C1 fill:#1a1a1a,stroke:#333,color:#fff
+    style M1 fill:#1a1a1a,stroke:#333,color:#fff
+    style GNN fill:#2d3436,stroke:#333,color:#fff
+    style H fill:#e67e22,stroke:#d35400,color:#fff
 ```
 
 $$
@@ -70,10 +76,12 @@ graph TD
     Inf --> Viral((Viral))
     Inf --> Bac((Bacterial))
     
-    style Root fill:#f9f,stroke:#333
-    style Disease fill:#ccf,stroke:#333
-    style Inf fill:#afa,stroke:#333
-    style Viral fill:#fff,stroke:#333
+    style Root fill:#d63031,stroke:#333,color:#fff
+    style Disease fill:#0984e3,stroke:#333,color:#fff
+    style Inf fill:#00b894,stroke:#333,color:#fff
+    style Neo fill:#6c5ce7,stroke:#333,color:#fff
+    style Viral fill:#2d3436,stroke:#333,color:#fff
+    style Bac fill:#2d3436,stroke:#333,color:#fff
 ```
 *Visualizing tree expansion: In hyperbolic space, the area available grows exponentially with radius, fitting exponentially many leaf nodes without crowding.*
 
