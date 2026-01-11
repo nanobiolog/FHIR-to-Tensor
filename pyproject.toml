@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neurofhir"
+version = "0.1.0"
+description = "Geometric Deep Learning for FHIR: Temporal, Hyperbolic, and Causal Graph Tensors"
+readme = "README.md"
+authors = [
+  { name = "ATIL İHSAN YALI", email = "nano.carbay@gmail.com" },
+]
+license = { text = "AGPL-3.0" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+keywords = ["fhir", "graph-neural-networks", "geometric-deep-learning", "healthcare", "temporal-graphs"]
+requires-python = ">=3.9"
+dependencies = [
+    "polars>=0.19.0",
+    "torch>=2.0.0",
+    "networkx>=3.0",
+]
+
+[project.optional-dependencies]
+full = [
+    "torch_geometric>=2.4.0",
+    "torch_geometric_temporal>=0.54.0"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/nanobiolog/FHIR-to-Tensor"
+"Bug Tracker" = "https://github.com/nanobiolog/FHIR-to-Tensor/issues"
+
+[tool.setuptools.packages.find]
+include = ["neurofhir*"]
