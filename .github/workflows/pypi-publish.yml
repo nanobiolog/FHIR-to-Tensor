@@ -17,6 +17,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      packages: write # Requried for GitHub Packages
 
     steps:
     - name: Checkout Source
@@ -35,3 +36,10 @@ jobs:
 
     - name: Publish package to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
+
+    - name: Publish to GitHub Packages
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://pypi.pkg.github.com/nanobiolog/
+        password: ${{ secrets.GITHUB_TOKEN }}
+        skip-existing: true
