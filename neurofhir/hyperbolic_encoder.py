@@ -151,3 +151,20 @@ class PoincareEmbedding(nn.Module):
         # Simple factory
         vocab_size = len(codes)
         return cls(vocab_size, 16) # default dim 16
+
+    def dist(self, u: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
+        """
+        Calculate the hyperbolic distance between two vectors u and v in the Poincare ball.
+        d(u, v) = arcosh(1 + 2 * ||u-v||^2 / ((1 - ||u||^2) * (1 - ||v||^2)))
+        """
+        sqdist = torch.sum((u - v) ** 2, dim=-1)
+        u_norm_sq = torch.sum(u ** 2, dim=-1)
+        v_norm_sq = torch.sum(v ** 2, dim=-1)
+        
+        # Clamp for numerical stability
+        u_norm_sq = u_norm_sq.clamp_max(1 - 1e-5)
+        v_norm_sq = v_norm_sq.clamp_max(1 - 1e-5)
+        
+        arg = 1 + 2 * sqdist / ((1 - u_norm_sq) * (1 - v_norm_sq))
+        # acosh(x) is defined for x >= 1. clamp min 1+epsilon
+        return torch.acosh(arg.clamp_min(1.0 + 1e-7))

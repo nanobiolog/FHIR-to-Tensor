@@ -164,6 +164,80 @@ class CausalEdgeMiner:
         
         return pl.DataFrame(schema=["source", "target", "relation", "weight", "timestamp"])
 
+    def mine_temporal_precedence(self, fhir_resources: List[Dict[str, Any]], 
+                                 source_code_match: str, target_code_match: str, 
+                                 max_window_days: int = 30) -> pl.DataFrame:
+        """
+        Generic temporal mining: Find instances where Event A (source) happens before Event B (target)
+        within a specific window.
+        
+        Args:
+            source_code_match: Regex string for source code (e.g. 'surgery')
+            target_code_match: Regex string for target code (e.g. 'complication')
+        """
+        # Reuse basic extraction
+        # For efficiency, we just call mine_relationships extraction logic or duplicate minimal parts.
+        # Let's duplicate minimal logic for flexibility as mine_relationships is hardcoded rules.
+        
+        events = []
+        for res in fhir_resources:
+            ts_str = res.get("effectiveDateTime") or res.get("recordedDate") or res.get("issued") or res.get("authoredOn")
+            if not ts_str: continue
+            
+            # Code?
+            code_text = ""
+            cc = res.get("code", {})
+            if isinstance(cc, dict):
+                 if cc.get("text"): code_text = cc.get("text")
+                 elif cc.get("coding"): code_text = cc["coding"][0].get("display", "") or cc["coding"][0].get("code", "")
+            
+            # Simple normalization
+            code_text = code_text.lower()
+            
+            try:
+                if ts_str.endswith("Z"): ts_str = ts_str[:-1] + "+00:00"
+                ts = datetime.datetime.fromisoformat(ts_str)
+            except: continue
+            
+            events.append({
+                "id": res.get("id"),
+                "code": code_text,
+                "timestamp": ts,
+                "patient": res.get("subject", {}).get("reference", "")
+            })
+            
+        if not events: return pl.DataFrame()
+        
+        df = pl.DataFrame(events)
+        
+        # Find Sources
+        sources = df.filter(pl.col("code").str.contains(source_code_match))
+        # Find Targets
+        targets = df.filter(pl.col("code").str.contains(target_code_match))
+        
+        if sources.height == 0 or targets.height == 0:
+            return pl.DataFrame()
+            
+        # Join on Patient
+        pairs = sources.join(targets, on="patient", how="inner", suffix="_tgt")
+        
+        # Filter Time: Tgt > Src AND Tgt < Src + Window
+        pairs = pairs.filter(
+            (pl.col("timestamp_tgt") > pl.col("timestamp")) &
+            (pl.col("timestamp_tgt") < pl.col("timestamp") + datetime.timedelta(days=max_window_days))
+        )
+        
+        if pairs.height == 0:
+             return pl.DataFrame()
+             
+        return pairs.select([
+            pl.col("id").alias("source"),
+            pl.col("id_tgt").alias("target"),
+            pl.lit("PRECEDES").alias("relation"),
+            pl.col("timestamp_tgt").alias("timestamp")
+        ])
+
+
     def create_dag(self, edges_df: pl.DataFrame) -> Any:
         """
         Convert edge dataframe to NetworkX DAG for analysis if needed.

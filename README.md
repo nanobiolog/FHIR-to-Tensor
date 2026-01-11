@@ -34,6 +34,26 @@ NeuroFHIR is built upon three pillars of modern geometric learning:
 
 ### 1. Dynamic Temporal Graphs
 We model patient sequences not as static vectors but as evolving graph snapshots $\mathcal{G}_t = (V_t, E_t)$.
+
+```mermaid
+graph LR
+    subgraph "T=1 (Admission)"
+    P1[p1: Patient] -- "has" --> C1[c1: Sepsis]
+    end
+
+    subgraph "T=2 (Treatment)"
+    P1 -- "has" --> C1
+    P1 -- "prescribed" --> M1[m1: Antibiotics]
+    M1 -- "treats" --> C1
+    end
+
+    subgraph "Graph Tensor"
+    T1[Snapshot 1] --> GNN
+    T2[Snapshot 2] --> GNN
+    GNN --> H[Hidden State]
+    end
+```
+
 $$
 h_v^{(t)} = \text{GRU}(h_v^{(t-1)}, \text{AGG}(\{h_u^{(t)} : u \in \mathcal{N}(v)\}))
 $$
@@ -41,6 +61,21 @@ This allows the model to learn **temporal dynamics** of interactions (e.g., *Dru
 
 ### 2. Hyperbolic Geometry (The Poincaré Ball)
 Medical ontologies (ICD-10, ATC, SNOMED) are inherently hierarchical trees. Embedding them into Euclidean space ($\mathbb{R}^n$) causes massive distortion. NeuroFHIR utilizes **Hyperbolic Space** ($\mathbb{H}^n$), which grows exponentially, naturally accommodating trees.
+
+```mermaid
+graph TD
+    Root((Root)) --> Disease((Disease))
+    Disease --> Inf((Infection))
+    Disease --> Neo((Neoplasm))
+    Inf --> Viral((Viral))
+    Inf --> Bac((Bacterial))
+    
+    style Root fill:#f9f,stroke:#333
+    style Disease fill:#ccf,stroke:#333
+    style Inf fill:#afa,stroke:#333
+    style Viral fill:#fff,stroke:#333
+```
+*Visualizing tree expansion: In hyperbolic space, the area available grows exponentially with radius, fitting exponentially many leaf nodes without crowding.*
 
 We model embeddings in the **Poincaré Ball** $(\mathbb{D}^n, g_x)$ with curvature $c=1$.
 The distance metric is defined as:
@@ -56,6 +91,19 @@ $$
 
 ### 3. Causal Topology
 Correlation is not causation. NeuroFHIR extracts a causal graph $G_{causal}$ where edges represent logical implications derived from clinical guidelines:
+
+```mermaid
+sequenceDiagram
+    participant P as Patient
+    participant M as Med_X
+    participant S as Symptom_Z
+    
+    P->>M: Administered (t=1)
+    P->>S: Appears (t=2)
+    Note over M,S: If t_med < t_symptom AND <br/> known side-effect
+    M->>S: CAUSES (Causal Edge)
+```
+
 - **Treatment Success**: $Med_X \xrightarrow{treats} Condition_Y$ (if $t_{med} < t_{cond\_end}$)
 - **Adverse Event**: $Med_X \xrightarrow{causes} Symptom_Z$ (if $t_{med} < t_{symptom}$ and known side-effect)
 
@@ -106,6 +154,12 @@ for snapshot in snapshots:
 
 print(f"Generated {len(temporal_signal)} distinct time steps.")
 # > Generated 2 distinct time steps.
+
+# 5. Inspect Graph Statistics (New in v0.1.4)
+builder.summary(snapshots)
+# > --- FHIR Temporal Graph Summary ---
+# > Snapshot 0: 10 nodes, 1 edges
+# > ...
 ```
 
 ### Use Case 2: Hierarchy-Aware Concept Embedding
@@ -135,11 +189,7 @@ vectors = embedding_layer(ids)
 
 # 3. Calculate Hyperbolic Distance
 # In hyperbolic space, distance grows exponentially as you move to edge
-def hyperbolic_dist(u, v):
-    sqdist = torch.sum((u - v) ** 2, dim=-1)
-    return torch.acosh(1 + 2 * sqdist / ((1 - torch.norm(u)**2) * (1 - torch.norm(v)**2)))
-
-dist = hyperbolic_dist(vectors[0], vectors[1])
+dist = embedding_layer.dist(vectors[0], vectors[1])
 print(f"Semantic Distance: {dist.item()}")
 ```
 

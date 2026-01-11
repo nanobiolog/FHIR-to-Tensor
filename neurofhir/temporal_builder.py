@@ -287,3 +287,45 @@ class FHIRTemporalGraphBuilder:
             setattr(data, "timestamp", timestamp)
 
         return data
+
+    @staticmethod
+    def summary(snapshots: Iterator[Union[Any, Dict]]) -> None:
+        """
+        Consumes the iterator (warning: irreversible!) and prints stats.
+        Useful for debugging or analysis after build.
+        """
+        count = 0
+        total_nodes = 0
+        total_edges = 0
+        
+        print("--- FHIR Temporal Graph Summary ---")
+        for i, snap in enumerate(snapshots):
+            count += 1
+            if isinstance(snap, dict):
+                # Dict mode
+                # num_nodes might be a dict {type: count}
+                nn = snap.get("num_nodes", {})
+                if isinstance(nn, dict):
+                    nn_val = sum(nn.values())
+                else:
+                    nn_val = nn
+                
+                # Edges: dict of list pairs
+                ne_val = 0
+                edges = snap.get("edges", {})
+                for k, v in edges.items():
+                    ne_val += len(v[0])
+            else:
+                # PyG HeteroData mode
+                nn_val = snap.num_nodes
+                ne_val = snap.num_edges
+            
+            total_nodes += nn_val
+            total_edges += ne_val
+            print(f"Snapshot {i}: {nn_val} nodes, {ne_val} edges")
+            
+        print("-----------------------------------")
+        print(f"Total Snapshots: {count}")
+        print(f"Avg Nodes/Snap:  {total_nodes / count if count else 0:.1f}")
+        print(f"Avg Edges/Snap:  {total_edges / count if count else 0:.1f}")
+
