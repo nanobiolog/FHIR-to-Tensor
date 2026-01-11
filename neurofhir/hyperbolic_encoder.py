@@ -44,14 +44,16 @@ class PoincareEmbedding(nn.Module):
     """
 
     def __init__(self, num_embeddings: int, embedding_dim: int, padding_idx: Optional[int] = None, 
-                 ontology_map: Optional[Dict[str, List[str]]] = None):
+                 ontology_map: Optional[Dict[str, List[str]]] = None, idx_to_code: Optional[Dict[int, str]] = None):
         """
         Args:
             num_embeddings: Size of the dictionary of embeddings.
             embedding_dim: The size of each embedding vector.
             padding_idx: If given, pads the output with the embedding vector at padding_idx.
+            padding_idx: If given, pads the output with the embedding vector at padding_idx.
             ontology_map: A dictionary mapping parent codes to children for initialization.
-                          If None, uses internal defaults.
+            idx_to_code: Optional dictionary mapping embedding indices to code strings.
+                         Required for semantic initialization using ontology_map.
         """
         if torch is None:
             raise ImportError("NeuroFHIR requires 'torch' for PoincareEmbedding.")
@@ -65,9 +67,10 @@ class PoincareEmbedding(nn.Module):
         self.weight = nn.Parameter(torch.Tensor(num_embeddings, embedding_dim))
         
         # Initialize
-        self.reset_parameters(ontology_map)
+        self.reset_parameters(ontology_map, idx_to_code)
 
-    def reset_parameters(self, ontology_map: Optional[Dict[str, List[str]]] = None):
+    def reset_parameters(self, ontology_map: Optional[Dict[str, List[str]]] = None, 
+                         idx_to_code: Optional[Dict[int, str]] = None):
         """
         Initialize weights using the ontology hierarchy.
         Nodes closer to the root (generic codes) are placed near the origin.
@@ -80,20 +83,40 @@ class PoincareEmbedding(nn.Module):
             with torch.no_grad():
                 self.weight[self.padding_idx].fill_(0)
         
-        if ontology_map is None:
-            # Fallback to internal demo ontology if not provided
-            ontology_map = ONTOLOGY_ROOTS
+        if ontology_map is None or idx_to_code is None:
+            return
 
-        # Recursive simplified placement (simulated embedding init)
-        # This is a heuristic: Root at 0.1 radius, children at +0.1 radius in subdivided angles.
-        # Real implementation would need a known mapping of "Code" -> "Index".
-        # For this class, we assume the user manages the index mapping external or via a subclass.
-        # But for the requested "Medical Relationship" preservation, we demonstrate the math:
-        
-        pass # Actual index-to-code mapping not tracked in this generic class, 
-             # so we cannot reliably placing "A00" at index X without a vocab.
-             # In a real NLP embedding class, vocab is passed.
-             # We assume standard random init is fine for now unless vocab is integrated.
+        # 1. Invert mapping to find parents for each code
+        code_to_parent = {}
+        for parent, children in ontology_map.items():
+            for child in children:
+                code_to_parent[child] = parent
+
+        # 2. Iterate all indices and place them
+        # Heuristic: Roots at radius 0.05, Children at radius +0.1 from parent angle
+        with torch.no_grad():
+            for idx, code in idx_to_code.items():
+                if idx == self.padding_idx: continue
+                
+                # Check depth
+                depth = 0
+                curr = code
+                while curr in code_to_parent:
+                    depth += 1
+                    curr = code_to_parent[curr]
+                    if depth > 10: break # Safety
+                
+                # Simple radial placement based on depth
+                # r = 0.1 * (depth + 1)
+                # theta = hash(code) # Deterministic random angle
+                
+                r = 0.1 * (depth + 1)
+                # Use simple math for angle to distribute
+                angle = (hash(code) % 360) * (math.pi / 180.0)
+                
+                # 2D projection for first 2 dims, others noise
+                self.weight[idx, 0] = r * math.cos(angle)
+                self.weight[idx, 1] = r * math.sin(angle)
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         """

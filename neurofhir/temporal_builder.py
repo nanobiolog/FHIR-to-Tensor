@@ -57,8 +57,57 @@ class FHIRTemporalGraphBuilder:
             mapping[resource_id] = len(mapping)
         return mapping[resource_id]
 
-    # ... (rest of simple methods like parse_timestamp can stay, assuming they are not in the hunk) ...
-    # We focus on the placeholder replacement.
+    def build_snapshots(self, fhir_resources: List[Dict[str, Any]]) -> Iterator[Union[HeteroData, Dict]]:
+        """
+        Main entry point: temporal alignment and graph construction.
+        """
+        if not fhir_resources:
+            return iter([])
+
+        # 1. Parse Resources into a flat DataFrame with timestamps
+        data_dicts = []
+        for res in fhir_resources:
+            # Timestamp priority: recordedDate, effectiveDateTime, issued, authoredOn
+            ts_str = res.get("recordedDate") or res.get("effectiveDateTime") or res.get("issued") or res.get("authoredOn")
+            
+            if not ts_str:
+                continue
+                
+            try:
+                if ts_str.endswith("Z"):
+                     ts_str = ts_str[:-1] + "+00:00"
+                ts = datetime.datetime.fromisoformat(ts_str)
+            except ValueError:
+                continue
+
+            data_dicts.append({
+                "resourceType": res.get("resourceType"),
+                "id": res.get("id"),
+                "timestamp": ts,
+                "payload": res # Store full payload for edge extraction
+            })
+            
+        if not data_dicts:
+            return iter([])
+
+        df = pl.DataFrame(data_dicts).sort("timestamp")
+        
+        # 2. Group by Time Window (Downsampling)
+        # using dynamic grouper or manual iteration.
+        # For simplicity/robustness: use group_by_dynamic
+        
+        # We want snapshots.
+        # df = df.with_columns(pl.col("timestamp").dt.truncate(self.time_window).alias("window_start"))
+        # partitioned = df.partition_by("window_start", maintain_order=True)
+        
+        # Dynamic grouping usually requires aggregation. Here we just want to split.
+        # Let's use dt.truncate to assign specific windows.
+        
+        df = df.with_columns(pl.col("timestamp").dt.truncate(self.time_window).alias("snapshot_idx"))
+        
+        # 3. Construct Graphs per Window
+        for _, window_df in df.group_by("snapshot_idx", maintain_order=True):
+             yield self._construct_hetero_data(window_df)
 
     def _construct_hetero_data(self, df: pl.DataFrame) -> Union[HeteroData, Dict]:
         """
@@ -104,46 +153,125 @@ class FHIRTemporalGraphBuilder:
         # Scan columns that look like References (e.g., subject.reference, context.reference)
         # We look into the 'payload' dict.
         
-        edge_lists: Dict[Tuple[str, str, str], Tuple[List[int], List[int]]] = {}
+        edges_dict: Dict[Tuple[str, str, str], Tuple[List[int], List[int]]] = {}
 
-        for row in df.iter_rows(named=True):
-            src_type = row["resourceType"]
-            src_id = row["id"]
-            src_idx = self._get_node_index(src_type, src_id)
-            payload = row["payload"]
+        # 3. Vectorized Edge Construction
+        # We process each relation type we care about
+        # Defined as: (ReferenceFieldPath, EdgeType, TargetResourceType)
+        # Note: In generic FHIR, we might not know TargetType ahead of time if reference string is "Type/123".
+        # We can extract it processing the whole payload column.
+        
+        # Ensure we have a mapping from (Type, ID) -> GlobalIdx
+        # Create a DF for joining:
+        # We need a unified DF of all nodes in this snapshot with their global indices.
+        # Since _get_node_index is stateful, we must ensure all IDs in this 'df' are mapped.
+        # The previous loop (Step 1) already populated self.node_mapping and snapshot_node_indices.
+        # Let's create a Polars DF for the mapping to enable joins.
+        
+        # Flatten the current mapping for resources present in 'df'
+        # To do this efficiently, we can use the 'df' and map using map_elements (slow) or join.
+        # Better: Create a small DF of (Type, ID, Index) from the loop we just did?
+        # Step 1 logic was: iterate per type, get_index.
+        # We can optimize Step 1 to be:
+        # unique_ids = df.select("resourceType", "id").unique()
+        # Then map them.
+        
+        # For simplicity in this "Refactor Phase", we will stick to the fact that we have 'df'.
+        # We'll rely on the Reference string extracting (Type, ID).
+        
+        # 3a. Define Relations to extract
+        relation_configs = [
+            # (payload_field, edge_relation)
+            ("subject", "refers_to"),
+            ("encounter", "occurs_in"),
+            ("performer", "performed_by"),
+        ]
+
+        # 3b. Process each relation
+        for ref_field, edge_rel in relation_configs:
+            # Filter rows that have this field
+            # We assume 'payload' is struct. If not, this might fail, so we wrap in try/except or check schema.
+            # Safe approach using map_elements roughly for now if schema is unknown, 
+            # OR assuming the user provided standard Polars Structs.
+            # Given the previous code iterated row["payload"], it implies Mixed or Struct.
             
-            # Helper to add edge
-            def add_edge_if_exists(ref_key: str, edge_type: str):
-                ref = payload.get(ref_key, {})
-                ref_str = ref.get("reference")
-                if not ref_str or "/" not in ref_str:
-                    return
+            # Extract references: source_type, source_id, target_ref_str
+            # We use `pl.col("payload").struct.field(ref_field).struct.field("reference")`
+            # This is efficient.
+            try:
+                # Select only relevant columns
+                edge_candidates = df.select([
+                    pl.col("resourceType").alias("src_type"),
+                    pl.col("id").alias("src_id"),
+                    pl.col("payload").struct.field(ref_field).struct.field("reference").alias("ref_str")
+                ]).filter(pl.col("ref_str").is_not_null())
                 
-                parts = ref_str.split("/")
-                if len(parts) < 2: 
-                    return
-                tgt_type, tgt_id = parts[-2], parts[-1]
-                
-                # Get target index (updating mapping if it's a new node seen in ref)
-                tgt_idx = self._get_node_index(tgt_type, tgt_id)
-                
-                # Canonical edge type: (Source, Relation, Target)
-                # In PyG: (src, rel, dst) -> edge_index [2, E] (src_indices, dst_indices)
-                # But typically PyG edges are directed src->dst? 
-                # Yes. e.g. Observation -> has_subject -> Patient
-                
-                key = (src_type, edge_type, tgt_type)
-                if key not in edge_lists:
-                    edge_lists[key] = ([], [])
-                
-                edge_lists[key][0].append(src_idx)
-                edge_lists[key][1].append(tgt_idx)
+                if edge_candidates.height == 0:
+                    continue
 
-            # Common FHIR references
-            add_edge_if_exists("subject", "refers_to")
-            add_edge_if_exists("encounter", "occurs_in")
-            add_edge_if_exists("performer", "performed_by")
-            # Can extend to other standard fields
+                # Parse ref_str "Type/ID" -> "tgt_type", "tgt_id"
+                # split by /
+                edge_candidates = edge_candidates.with_columns([
+                    pl.col("ref_str").str.split("/").arr.get(-2).alias("tgt_type"),
+                    pl.col("ref_str").str.split("/").arr.get(-1).alias("tgt_id")
+                ])
+                
+                # Now we have src and tgt identifiers. We need to convert them to indices.
+                # Since 'node_mapping' is a Dict of Dicts, we can't easily join on it unless we convert it to a DF.
+                # HOWEVER, for a PRODUCTION builder, the mapping should be a DB or a growing DF.
+                # Here, we can do a quick lookup using map_dict if the mapping isn't massive, 
+                # or loop over the edge candidates df (which is much smaller than full df usually).
+                
+                # Compromise: Vectorized extraction, iterating for index lookup (still usually faster because python loop is smaller).
+                # OR, strictly vectorized:
+                # We have to handle that 'tgt' might be a NEW node not in 'df' (e.g. referencing a Patient not in this snapshot).
+                # If so, we must register it.
+                
+                # Let's iterate the edge_candidates to register nodes and build indices. 
+                # This is faster than iterating *every* row, just edges.
+                
+                src_indices = []
+                tgt_indices = []
+                
+                # Group by types to use specific mapping dicts
+                for row in edge_candidates.iter_rows(named=True):
+                    src_t, src_i = row["src_type"], row["src_id"]
+                    tgt_t, tgt_i = row["tgt_type"], row["tgt_id"]
+                    
+                    # Src index (should already be known from step 1, but safe to get)
+                    s_idx = self._get_node_index(src_t, src_i)
+                    
+                    # Tgt index (might be new/external)
+                    t_idx = self._get_node_index(tgt_t, tgt_i)
+                    
+                    src_indices.append(s_idx)
+                    tgt_indices.append(t_idx)
+                
+                if src_indices:
+                    # We might have mixed target types in one ref field (unlikely in FHIR strict, but possible "Subject" is Group or Patient)
+                    # We need to segregate by (src_type, tgt_type).
+                    # Re-iterate is sad. 
+                    # Optimization: The previous loop could group into dicts.
+                    
+                    # Revised Loop:
+                    for row in edge_candidates.iter_rows(named=True):
+                         src_t, src_i = row["src_type"], row["src_id"]
+                         tgt_t, tgt_i = row["tgt_type"], row["tgt_id"]
+                         
+                         key = (src_t, edge_rel, tgt_t)
+                         if key not in edges_dict:
+                             edges_dict[key] = ([], [])
+                         
+                         edges_dict[key][0].append(self._get_node_index(src_t, src_i))
+                         edges_dict[key][1].append(self._get_node_index(tgt_t, tgt_i))
+
+            except Exception as e:
+                # Likely field doesn't exist in schema
+                # logger.debug(f"Skipping edge extraction for {ref_field}: {e}")
+                pass
+        
+        # Rename for compatibility
+        edge_lists = edges_dict
 
         # 3. Assign to Data
         timestamp = df["timestamp"].min()

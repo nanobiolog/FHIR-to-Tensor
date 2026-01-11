@@ -53,8 +53,12 @@ class CausalEdgeMiner:
                 continue
 
             try:
-                ts = datetime.datetime.fromisoformat(ts_str.replace("Z", ""))
+                # Handle 'Z' for UTC and ensure timezone awareness
+                if ts_str.endswith("Z"):
+                    ts_str = ts_str[:-1] + "+00:00"
+                ts = datetime.datetime.fromisoformat(ts_str)
             except ValueError:
+                logger.debug(f"Skipping resource {res.get('id')} due to invalid date: {ts_str}")
                 continue
 
             # Extract Codes (simplified)
@@ -89,23 +93,24 @@ class CausalEdgeMiner:
         # 2. Rule: Infection -> Antibiotic -> Fever Drop
         
         # A. Find Infections
+        # A. Find Infections
         conditions = df.filter(
             (pl.col("type") == "Condition") & 
             (pl.col("code").str.contains("infection|sepsis|pneumonia"))
-        ).alias("cond")
+        )
 
         # B. Find Antibiotics started AFTER infection
         meds = df.filter(
             (pl.col("type") == "MedicationRequest") &
             (pl.col("code").str.contains("antibiotic|penicillin|fluoroquinolone"))
-        ).alias("med")
+        )
 
         # C. Find Fever Observations
         obs = df.filter(
             (pl.col("type") == "Observation") &
             (pl.col("code").str.contains("temp|fever")) &
             (pl.col("value").is_not_null())
-        ).alias("obs")
+        )
         
         # Sort observations by time to check for drops?
         # For simplicity of the "Fever Drop" rule, we verify that the observation 
