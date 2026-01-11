@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neurofhir"
-version = "0.1.0"
+version = "0.1.1"
 description = "Geometric Deep Learning for FHIR: Temporal, Hyperbolic, and Causal Graph Tensors"
 readme = "README.md"
 authors = [

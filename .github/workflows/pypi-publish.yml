@@ -40,6 +40,6 @@ jobs:
     - name: Publish to GitHub Packages
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        repository-url: https://pypi.pkg.github.com/nanobiolog/
+        repository-url: https://pypi.pkg.github.com/nanobiolog/FHIR-to-Tensor
         password: ${{ secrets.GITHUB_TOKEN }}
         skip-existing: true
