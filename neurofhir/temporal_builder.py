@@ -20,8 +20,10 @@ except ImportError:
 try:
     import torch
     from torch_geometric.data import HeteroData
+    torch_geometric_available = True
 except ImportError:
     torch = None
+    torch_geometric_available = False
     HeteroData = Any
 
 logger = logging.getLogger(__name__)
@@ -46,6 +48,7 @@ class FHIRTemporalGraphBuilder:
         # Global node mapping: {ResourceType: {OriginalID: Index}}
         self.node_mapping: Dict[str, Dict[str, int]] = {}
         self.time_window = time_window
+        self._warned_about_torch = False
 
     def _get_node_index(self, resource_type: str, resource_id: str) -> int:
         """Get or create a stable integer index for a node."""
@@ -67,30 +70,54 @@ class FHIRTemporalGraphBuilder:
         # 1. Parse Resources into a flat DataFrame with timestamps
         data_dicts = []
         for res in fhir_resources:
-            # Timestamp priority: recordedDate, effectiveDateTime, issued, authoredOn
-            ts_str = res.get("recordedDate") or res.get("effectiveDateTime") or res.get("issued") or res.get("authoredOn")
+            # Timestamp priority: recordedDate, effectiveDateTime, issued, authoredOn, period.start, birthDate, date
+            ts_str = res.get("recordedDate") or \
+                     res.get("effectiveDateTime") or \
+                     res.get("issued") or \
+                     res.get("authoredOn") or \
+                     res.get("period", {}).get("start") or \
+                     res.get("birthDate") or \
+                     res.get("date")
             
             if not ts_str:
                 continue
                 
             try:
+                # Handle varying precision (YYYY, YYYY-MM)
+                if len(ts_str) == 4: # YYYY
+                     ts_str += "-01-01"
+                if len(ts_str) == 7: # YYYY-MM
+                     ts_str += "-01"
+                     
                 if ts_str.endswith("Z"):
                      ts_str = ts_str[:-1] + "+00:00"
                 ts = datetime.datetime.fromisoformat(ts_str)
+                
+                # Ensure timezone awareness (UTC)
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=datetime.timezone.utc)
+                else:
+                    ts = ts.astimezone(datetime.timezone.utc)
             except ValueError:
                 continue
+
+            # Extract References Eagerly (to avoid Polars mixed-schema issues)
+            subj_ref = res.get("subject", {}).get("reference")
+            enc_ref = res.get("encounter", {}).get("reference")
 
             data_dicts.append({
                 "resourceType": res.get("resourceType"),
                 "id": res.get("id"),
                 "timestamp": ts,
-                "payload": res # Store full payload for edge extraction
+                "subject_ref": subj_ref,
+                "encounter_ref": enc_ref,
+                "payload": res # Store full payload for potential feature extraction later
             })
             
         if not data_dicts:
             return iter([])
 
-        df = pl.DataFrame(data_dicts).sort("timestamp")
+        df = pl.DataFrame(data_dicts, strict=False).sort("timestamp")
         
         # 2. Group by Time Window (Downsampling)
         # using dynamic grouper or manual iteration.
@@ -106,16 +133,26 @@ class FHIRTemporalGraphBuilder:
         df = df.with_columns(pl.col("timestamp").dt.truncate(self.time_window).alias("snapshot_idx"))
         
         # 3. Construct Graphs per Window
-        for _, window_df in df.group_by("snapshot_idx", maintain_order=True):
-             yield self._construct_hetero_data(window_df)
+        # 3. Construct Graphs per Window
+        for window_start, window_df in df.group_by("snapshot_idx", maintain_order=True):
+             # Ensure window_start is datetime (it is, from dt.truncate)
+             # But might be tuple if multiple keys? No, single key.
+             # Polars group_by key is tuple if multiple keys, scalar if single?
+             # Let's handle it safely.
+             if isinstance(window_start, tuple):
+                 window_start = window_start[0]
+                 
+             yield self._construct_hetero_data(window_df, window_start)
 
-    def _construct_hetero_data(self, df: pl.DataFrame) -> Union[HeteroData, Dict]:
+    def _construct_hetero_data(self, df: pl.DataFrame, window_start: Any) -> Union[HeteroData, Dict]:
         """
         Constructs a HeteroData object (or dict) from the dataframe of the current snapshot.
         Resolves references to build edge indices.
         """
         if torch is None:
-            logger.warning("Torch not found, returning dict representation.") 
+            if not self._warned_about_torch:
+                logger.warning("Torch not found, returning dict representation (suppressing further warnings).") 
+                self._warned_about_torch = True
             data = {}
         else:
             data = HeteroData()
@@ -182,9 +219,10 @@ class FHIRTemporalGraphBuilder:
         # 3a. Define Relations to extract
         relation_configs = [
             # (payload_field, edge_relation)
+            # (payload_field, edge_relation)
             ("subject", "refers_to"),
             ("encounter", "occurs_in"),
-            ("performer", "performed_by"),
+            # ("performer", "performed_by"), # Disabled until list handling is implemented
         ]
 
         # 3b. Process each relation
@@ -196,35 +234,55 @@ class FHIRTemporalGraphBuilder:
             # Given the previous code iterated row["payload"], it implies Mixed or Struct.
             
             # Extract references: source_type, source_id, target_ref_str
-            # We use `pl.col("payload").struct.field(ref_field).struct.field("reference")`
-            # This is efficient.
+            # Use eagerly extracted columns
+            col_name = f"{ref_field}_ref"
+            
             try:
                 # Select only relevant columns
                 edge_candidates = df.select([
                     pl.col("resourceType").alias("src_type"),
                     pl.col("id").alias("src_id"),
-                    pl.col("payload").struct.field(ref_field).struct.field("reference").alias("ref_str")
+                    pl.col(col_name).alias("ref_str")
                 ]).filter(pl.col("ref_str").is_not_null())
                 
                 if edge_candidates.height == 0:
                     continue
 
                 # Parse ref_str "Type/ID" -> "tgt_type", "tgt_id"
-                # split by /
+                # Handle cases like "urn:uuid:..." or simple IDs
+                # We will extract the ID part. If it's a URN, we might need a mapping of urn->(Type, ID)
+                # But typically in these bundles, the 'id' field of the target resource matches the UUID if stripped, 
+                # OR we just rely on the fact that we mapped everything by (Type, ID).
+                
+                # Robust parsing:
+                # If "Type/ID", take ID.
+                # If "urn:uuid:ID", take ID.
+                # If just "ID", take ID.
+                
                 edge_candidates = edge_candidates.with_columns([
-                    pl.col("ref_str").str.split("/").arr.get(-2).alias("tgt_type"),
-                    pl.col("ref_str").str.split("/").arr.get(-1).alias("tgt_id")
+                    pl.col("ref_str").map_elements(lambda x: x.split("/")[-2] if "/" in x and not x.startswith("urn:") else None, return_dtype=pl.Utf8).alias("tgt_type_hint"),
+                    pl.col("ref_str").map_elements(lambda x: x.split(":")[-1] if "urn:" in x else (x.split("/")[-1] if "/" in x else x), return_dtype=pl.Utf8).alias("tgt_id")
                 ])
+
+                # Note: If we just have 'tgt_id', we might not know 'tgt_type' to look up in node_mapping.
+                # However, for 'refers_to' (Subject), we know it's usually Patient.
+                # For 'occurs_in' (Encounter), it's Encounter.
+                # For 'performed_by' (Performer), it's Practitioner/Organization.
                 
-                # Now we have src and tgt identifiers. We need to convert them to indices.
-                # Since 'node_mapping' is a Dict of Dicts, we can't easily join on it unless we convert it to a DF.
-                # HOWEVER, for a PRODUCTION builder, the mapping should be a DB or a growing DF.
-                # Here, we can do a quick lookup using map_dict if the mapping isn't massive, 
-                # or loop over the edge candidates df (which is much smaller than full df usually).
-                
-                # Compromise: Vectorized extraction, iterating for index lookup (still usually faster because python loop is smaller).
-                # OR, strictly vectorized:
-                # We have to handle that 'tgt' might be a NEW node not in 'df' (e.g. referencing a Patient not in this snapshot).
+                # We can try to infer type or look up in ALL types.
+                # Since we know the schema:
+                inferred_target_type = "Patient" if ref_field == "subject" else \
+                                       "Encounter" if ref_field == "encounter" else \
+                                       "Practitioner" # performed_by is ambiguous but let's try
+                                       
+                # If the reference string had a type hint, use it.
+                edge_candidates = edge_candidates.with_columns(
+                   pl.when(pl.col("tgt_type_hint").is_not_null())
+                   .then(pl.col("tgt_type_hint"))
+                   .otherwise(pl.lit(inferred_target_type))
+                   .alias("tgt_type")
+                )
+
                 # If so, we must register it.
                 
                 # Let's iterate the edge_candidates to register nodes and build indices. 
@@ -275,18 +333,21 @@ class FHIRTemporalGraphBuilder:
 
         # 3. Assign to Data
         timestamp = df["timestamp"].min()
-        if isinstance(data, dict):
-            # Dict Mode
-            data["edges"] = edge_lists
-            data["timestamp"] = timestamp
-        else:
-            # Torch Mode
-            for (src, rel, dst), (srcs, dsts) in edge_lists.items():
-                data[src, rel, dst].edge_index = torch.tensor([srcs, dsts], dtype=torch.long)
-            
-            setattr(data, "timestamp", timestamp)
 
-        return data
+        if torch_geometric_available:
+            data = HeteroData()
+            # ... (truncated for brevity, keep existing logic)
+            for (src, rel, dst), (src_idx, dst_idx) in edges_dict.items():
+                 data[src, rel, dst].edge_index = torch.tensor([src_idx, dst_idx], dtype=torch.long)
+            data["timestamp"] = window_start
+            return data
+        else:
+             return {
+                "timestamp": window_start,
+                "num_nodes": {k: len(v) for k, v in self.node_mapping.items()}, # Approximation or use snapshot_node_indices counts if available? 
+                # Actually builder uses self.node_mapping length which is cumulative.
+                "edge_index_dict": edges_dict
+            }
 
     @staticmethod
     def summary(snapshots: Iterator[Union[Any, Dict]]) -> None:

@@ -4,6 +4,7 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![PyPi](https://img.shields.io/badge/pypi-v0.1.4-blue.svg)](https://pypi.org/project/neurofhir/)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nanobiolog/FHIR-to-Tensor/blob/main/examples/quickstart_notebook.ipynb)
 
 **NeuroFHIR** is a state-of-the-art library for transforming longitudinal FHIR (Fast Healthcare Interoperability Resources) data into **Temporal, Hierarchical, and Explainable Graph Tensors**. It enables the application of **Geometric Deep Learning (GDL)** to clinical informatics, moving beyond simple feature vectors to capture the true topological and temporal nature of patient health.
 
@@ -66,7 +67,18 @@ $$
 
 This allows the model to learn **temporal dynamics** of interactions (e.g., *Drug A* interacts with *Drug B* only if taken within 2 hours).
 
-### 2. Hyperbolic Geometry (The Poincaré Ball)
+### 2. Graph Visualization (New!)
+NeuroFHIR provides built-in capabilities to visualize these complex temporal interactions. You can inspect specific snapshots to understand the connectivity of healthcare events:
+
+**Example Output:**
+*(Generated from `examples/05_visualize_graph.py`)*
+
+![Graph Visualization](graph_visualization.png)
+
+> The visualization shows nodes (Patients, Encounters, Observations) colored by type, with directed edges representing relationships like `occurs_in` or `refers_to`.
+> See `examples/quickstart_notebook.ipynb` for an interactive demo.
+
+### 3. Hyperbolic Geometry (The Poincaré Ball)
 Medical ontologies (ICD-10, ATC, SNOMED) are inherently hierarchical trees. Embedding them into Euclidean space ($\mathbb{R}^n$) causes massive distortion. NeuroFHIR utilizes **Hyperbolic Space** ($\mathbb{H}^n$), which grows exponentially, naturally accommodating trees.
 
 ```mermaid
@@ -248,3 +260,16 @@ We welcome contributions from researchers and clinicians.
 **AGPL-3.0**
 Copyright (C) 2026 ATIL İHSAN YALI.
 Commercial dual-licensing available upon request.
+
+## 📚 Citation
+
+If you use NeuroFHIR in your research, please cite:
+
+```bibtex
+@software{neurofhir2026,
+  author = {Atil Ihsan Yali},
+  title = {NeuroFHIR: Geometric Deep Learning for Clinical Informatics},
+  year = {2026},
+  url = {https://github.com/nanobiolog/FHIR-to-Tensor}
+}
+```

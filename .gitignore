@@ -209,3 +209,7 @@ __marimo__/
 # Internal Release Documentation
 RELEASE_GUIDE.md
 RELEASE_NOTES.md
+
+# Data directory
+data/
+!data/*.zip

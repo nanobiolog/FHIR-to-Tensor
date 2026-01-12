@@ -1,0 +1,1755 @@
+[
+  {
+    "edges": {},
+    "num_nodes": {
+      "Patient": 1
+    },
+    "timestamp": "1945-12-10 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          0
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__refers_to__Patient": {
+        "src": [
+          0,
+          1
+        ],
+        "dst": [
+          0,
+          0
+        ]
+      },
+      "Condition__occurs_in__Encounter": {
+        "src": [
+          0,
+          1
+        ],
+        "dst": [
+          0,
+          0
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 1,
+      "Condition": 2
+    },
+    "timestamp": "1965-11-15 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          1
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__refers_to__Patient": {
+        "src": [
+          2
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__occurs_in__Encounter": {
+        "src": [
+          2
+        ],
+        "dst": [
+          1
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 2,
+      "Condition": 3
+    },
+    "timestamp": "1977-02-21 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          2
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__refers_to__Patient": {
+        "src": [
+          3,
+          4
+        ],
+        "dst": [
+          0,
+          0
+        ]
+      },
+      "CareTeam__refers_to__Patient": {
+        "src": [
+          0
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "CarePlan__refers_to__Patient": {
+        "src": [
+          0
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__occurs_in__Encounter": {
+        "src": [
+          3,
+          4
+        ],
+        "dst": [
+          2,
+          2
+        ]
+      },
+      "CareTeam__occurs_in__Encounter": {
+        "src": [
+          0
+        ],
+        "dst": [
+          2
+        ]
+      },
+      "CarePlan__occurs_in__Encounter": {
+        "src": [
+          0
+        ],
+        "dst": [
+          2
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 3,
+      "Condition": 5,
+      "CareTeam": 1,
+      "CarePlan": 1
+    },
+    "timestamp": "1987-12-21 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          3
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          0
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "dst": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          0
+        ],
+        "dst": [
+          3
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 4,
+      "Condition": 5,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 15,
+      "DiagnosticReport": 1
+    },
+    "timestamp": "2010-03-01 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          4
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__refers_to__Patient": {
+        "src": [
+          5
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          15,
+          16
+        ],
+        "dst": [
+          0,
+          0
+        ]
+      },
+      "Condition__occurs_in__Encounter": {
+        "src": [
+          5
+        ],
+        "dst": [
+          4
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          15,
+          16
+        ],
+        "dst": [
+          4,
+          4
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 5,
+      "Condition": 6,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 17,
+      "DiagnosticReport": 1
+    },
+    "timestamp": "2010-12-07 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          5
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          1,
+          2
+        ],
+        "dst": [
+          0,
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35
+        ],
+        "dst": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          1,
+          2
+        ],
+        "dst": [
+          5,
+          5
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 6,
+      "Condition": 6,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 36,
+      "DiagnosticReport": 3
+    },
+    "timestamp": "2011-03-07 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          6
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__refers_to__Patient": {
+        "src": [
+          6
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__occurs_in__Encounter": {
+        "src": [
+          6
+        ],
+        "dst": [
+          6
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 7,
+      "Condition": 7,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 36,
+      "DiagnosticReport": 3
+    },
+    "timestamp": "2011-11-03 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          7
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          3
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50
+        ],
+        "dst": [
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          7
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          3
+        ],
+        "dst": [
+          7
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 8,
+      "Condition": 7,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 51,
+      "DiagnosticReport": 4
+    },
+    "timestamp": "2012-03-12 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          8
+        ],
+        "dst": [
+          0
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 9,
+      "Condition": 7,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 51,
+      "DiagnosticReport": 4
+    },
+    "timestamp": "2012-03-31 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          9
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__refers_to__Patient": {
+        "src": [
+          7
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__occurs_in__Encounter": {
+        "src": [
+          7
+        ],
+        "dst": [
+          9
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 10,
+      "Condition": 8,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 51,
+      "DiagnosticReport": 4
+    },
+    "timestamp": "2013-01-18 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          10
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          4,
+          5
+        ],
+        "dst": [
+          0,
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76
+        ],
+        "dst": [
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          4,
+          5
+        ],
+        "dst": [
+          10,
+          10
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 11,
+      "Condition": 8,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 77,
+      "DiagnosticReport": 6
+    },
+    "timestamp": "2013-03-18 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          11
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__refers_to__Patient": {
+        "src": [
+          8
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__occurs_in__Encounter": {
+        "src": [
+          8
+        ],
+        "dst": [
+          11
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 12,
+      "Condition": 9,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 77,
+      "DiagnosticReport": 6
+    },
+    "timestamp": "2013-10-13 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          12
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          6,
+          7
+        ],
+        "dst": [
+          0,
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95
+        ],
+        "dst": [
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          6,
+          7
+        ],
+        "dst": [
+          12,
+          12
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 13,
+      "Condition": 9,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 96,
+      "DiagnosticReport": 8
+    },
+    "timestamp": "2014-03-24 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          13
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          8
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110
+        ],
+        "dst": [
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          8
+        ],
+        "dst": [
+          13
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 14,
+      "Condition": 9,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 111,
+      "DiagnosticReport": 9
+    },
+    "timestamp": "2015-03-30 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          14
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          9
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125
+        ],
+        "dst": [
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          9
+        ],
+        "dst": [
+          14
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 15,
+      "Condition": 9,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Observation": 126,
+      "DiagnosticReport": 10
+    },
+    "timestamp": "2016-04-04 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          15
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__refers_to__Patient": {
+        "src": [
+          9
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          126
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "MedicationRequest__refers_to__Patient": {
+        "src": [
+          0
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "CareTeam__refers_to__Patient": {
+        "src": [
+          1
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "CarePlan__refers_to__Patient": {
+        "src": [
+          1
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Condition__occurs_in__Encounter": {
+        "src": [
+          9
+        ],
+        "dst": [
+          15
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          126
+        ],
+        "dst": [
+          15
+        ]
+      },
+      "MedicationRequest__occurs_in__Encounter": {
+        "src": [
+          0
+        ],
+        "dst": [
+          15
+        ]
+      },
+      "CareTeam__occurs_in__Encounter": {
+        "src": [
+          1
+        ],
+        "dst": [
+          15
+        ]
+      },
+      "CarePlan__occurs_in__Encounter": {
+        "src": [
+          1
+        ],
+        "dst": [
+          15
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 16,
+      "Condition": 10,
+      "CareTeam": 2,
+      "CarePlan": 2,
+      "Observation": 127,
+      "DiagnosticReport": 10,
+      "MedicationRequest": 1
+    },
+    "timestamp": "2016-05-21 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          16
+        ],
+        "dst": [
+          0
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 17,
+      "Condition": 10,
+      "CareTeam": 2,
+      "CarePlan": 2,
+      "Observation": 127,
+      "DiagnosticReport": 10,
+      "MedicationRequest": 1
+    },
+    "timestamp": "2016-06-20 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          17
+        ],
+        "dst": [
+          0
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 18,
+      "Condition": 10,
+      "CareTeam": 2,
+      "CarePlan": 2,
+      "Observation": 127,
+      "DiagnosticReport": 10,
+      "MedicationRequest": 1
+    },
+    "timestamp": "2017-03-30 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          18
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          10,
+          11
+        ],
+        "dst": [
+          0,
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145
+        ],
+        "dst": [
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18,
+          18
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          10,
+          11
+        ],
+        "dst": [
+          18,
+          18
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 19,
+      "Condition": 10,
+      "CareTeam": 2,
+      "CarePlan": 2,
+      "Observation": 146,
+      "DiagnosticReport": 12,
+      "MedicationRequest": 1
+    },
+    "timestamp": "2017-04-10 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          19
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          12,
+          13
+        ],
+        "dst": [
+          0,
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171
+        ],
+        "dst": [
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19,
+          19
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          12,
+          13
+        ],
+        "dst": [
+          19,
+          19
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 20,
+      "Condition": 10,
+      "CareTeam": 2,
+      "CarePlan": 2,
+      "Observation": 172,
+      "DiagnosticReport": 14,
+      "MedicationRequest": 1
+    },
+    "timestamp": "2018-04-16 00:00:00+00:00"
+  },
+  {
+    "edges": {
+      "Encounter__refers_to__Patient": {
+        "src": [
+          20
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__refers_to__Patient": {
+        "src": [
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186
+        ],
+        "dst": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "DiagnosticReport__refers_to__Patient": {
+        "src": [
+          14
+        ],
+        "dst": [
+          0
+        ]
+      },
+      "Observation__occurs_in__Encounter": {
+        "src": [
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186
+        ],
+        "dst": [
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20,
+          20
+        ]
+      },
+      "DiagnosticReport__occurs_in__Encounter": {
+        "src": [
+          14
+        ],
+        "dst": [
+          20
+        ]
+      }
+    },
+    "num_nodes": {
+      "Patient": 1,
+      "Encounter": 21,
+      "Condition": 10,
+      "CareTeam": 2,
+      "CarePlan": 2,
+      "Observation": 187,
+      "DiagnosticReport": 15,
+      "MedicationRequest": 1
+    },
+    "timestamp": "2019-04-22 00:00:00+00:00"
+  }
+]
